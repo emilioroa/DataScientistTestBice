@@ -1,70 +1,117 @@
-# Desafío Técnico — Data Scientist Senior
+# Desafío Técnico — Data Scientist Senior · Andina Crédito
 
-> **Cómo empezar:** haz un **fork** de este repositorio a tu cuenta de GitHub (botón *Fork*, arriba a la derecha). Trabaja en tu fork y, al terminar, **envíanos el link a tu repositorio público** según las instrucciones de [Entrega](#entrega). No abras Pull Requests sobre este repo.
+Modelo de probabilidad de default (mora 90+ días a 12 meses) para solicitudes de crédito de consumo, y su traducción a una política de aprobación con impacto económico cuantificado.
 
-## Contexto de negocio
+## Estado del proyecto
 
-**Andina Crédito** es una fintech de créditos de consumo. Hoy las solicitudes se aprueban con reglas simples y la mora se ha vuelto un problema: el equipo de Riesgo te pide construir el primer modelo de **probabilidad de default** (mora de 90+ días dentro de los 12 meses posteriores al desembolso) para apoyar la decisión de aprobación.
+| Etapa | Estado | Entregable |
+|---|---|---|
+| 1. EDA y auditoría de datos | ✅ | `notebooks/01_eda.ipynb` |
+| 2. Modelado, calibración y política | ✅ | `notebooks/02_modelo.ipynb`, `predictions.csv` |
+| 4. Informe ejecutivo | ⏳ | `INFORME.md` |
+| Uso de IA | 🔄 en actualización continua | `AI_USAGE.md` |
 
-Recibes dos archivos:
+## Hallazgos principales del EDA
 
-- `data/train.csv`: 45.300 solicitudes históricas desembolsadas entre **2024-01 y 2025-02**, con el resultado observado (`default_12m`).
-- `data/test.csv`: 12.000 solicitudes entre **2025-02 y 2025-06** que debes scorear (sin target).
+El detalle, con el gráfico que respalda cada conclusión, está en `notebooks/01_eda.ipynb`.
 
-La data proviene del data warehouse tal como está.
+1. **`num_contactos_ult_trimestre` es una fuga de información.** AUC univariado de 0,954 y 100% de default para 7 o más contactos. Su distribución además se corta en 6 en test mientras llega a 12 en train. Se excluye del modelo: incluirla infla el AUC out-of-time de 0,837 a 0,976 sin ningún poder predictivo real.
+2. **La cartera se está deteriorando.** La tasa de default sube de 7,1% a 13,3% entre 2024-01 y 2025-01, empujada por el crecimiento del canal digital (36% → 69% del volumen, con 12,5% de default frente a 7,2% en sucursal). El promedio de train (9,9%) subestima el riesgo del período de test, estimado en ~14%.
+3. **`ingreso_declarado` mezcla dos unidades.** Un 12% de los registros está expresado en miles de pesos. Se corrige multiplicando por 1.000 los valores bajo 10.000, verificado con Q-Q plot.
+4. **299 filas duplicadas exactas** con `id_solicitud` distinto, eliminadas.
+5. **El umbral de aprobación óptimo depende del plazo, no del monto**: 9,8% a 12 meses y 30,4% a 48 meses. Esto hace que la calibración del modelo sea más importante que su AUC.
 
-## Tu tarea
+## Instalación y ejecución
 
-1. **Explora y prepara la data.** Documenta los problemas que encuentres y las decisiones que tomes.
-2. **Construye un modelo** que estime la probabilidad de default para cada solicitud de `test.csv`.
-3. **Define una estrategia de validación** que entregue una estimación honesta de cómo rendirá el modelo en producción. Justifícala.
-4. **Recomienda una política de aprobación.** Usando la economía del producto (abajo), define el umbral de aprobación y estima la ganancia esperada de tu política versus aprobar todo.
-5. **Comunica.** El gerente de Riesgo no es técnico: tu informe debe poder leerlo él.
+Requiere Python 3.10 o superior. Ejecutar en orden desde la raíz del repositorio.
 
-### Economía del producto (simplificada)
+**1. Clonar el repositorio**
 
-- Si el cliente **paga**: ganancia ≈ `monto_solicitado × 12% anual × (plazo_meses / 12) × 0.5` (el factor 0.5 aproxima la amortización del capital).
-- Si el cliente **cae en default**: pérdida ≈ `monto_solicitado × 55%` (LGD).
-- Una solicitud rechazada no genera ganancia ni pérdida.
+```
+git clone https://github.com/<tu-usuario>/desafio-ds-senior.git
+cd desafio-ds-senior
+```
 
-## Uso de IA
+**2. Crear el entorno virtual**
 
-**Puedes y debes usar herramientas de IA** (Copilot, Claude, ChatGPT, agentes, etc.). Nos interesa cómo las usas, no que no las uses. Incluye en tu entrega un archivo `AI_USAGE.md` con:
+```
+python -m venv .venv
+```
 
-- Qué herramientas usaste y para qué partes del trabajo.
-- Al menos **2 ejemplos concretos** donde el output de la IA fue incorrecto, subóptimo o requirió tu corrección, y qué hiciste al respecto.
-- Qué validaste manualmente antes de confiar en código o análisis generado.
+**3. Activar el entorno**
 
-Una entrega donde todo fue aceptado tal como lo produjo la IA, sin evidencia de criterio propio, será evaluada negativamente aunque las métricas sean buenas.
+Windows:
 
-## Entregables
+```
+.venv\Scripts\activate
+```
 
-Dentro de tu repositorio público debes incluir:
+macOS / Linux:
 
-1. `predictions.csv` en la raíz, con columnas `id_solicitud,prob_default` y las 12.000 filas de test. Mira `predictions_example.csv` para el formato exacto.
-2. **Código reproducible**: tu solución más un `README` con los pasos para correrla (instalar dependencias y regenerar `predictions.csv`). Notebooks están bien si están ordenados y se ejecutan de principio a fin.
-3. **Informe ejecutivo** (máximo 2 páginas, en el repo como `.md` o `.pdf`): problemas encontrados en la data, enfoque, performance esperada con su justificación, política de aprobación recomendada y ganancia estimada, limitaciones y próximos pasos.
-4. `AI_USAGE.md` según lo descrito arriba.
+```
+source .venv/bin/activate
+```
 
-## Entrega
+Debe aparecer `(.venv)` al inicio del prompt.
 
-1. **Forkea** este repositorio a tu cuenta de GitHub y trabaja sobre tu fork (mantenlo **público**).
-2. Haz commits con frecuencia: el historial nos ayuda a entender tu proceso, así que evita un único commit gigante al final.
-3. Cuando termines, responde el correo del desafío con **el link a tu repositorio** (ej. `https://github.com/tu-usuario/desafio-ds-senior`).
-4. Asegúrate de que el repo sea público y de que `git clone` + los pasos de tu `README` reproduzcan tu `predictions.csv`.
+**4. Instalar las dependencias**
 
-## Condiciones
+```
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-- Plazo: **48 horas** desde la recepción del correo.
-- Lenguaje libre (Python recomendado). Librerías libres.
-- Reportaremos tu performance real sobre el target oculto de test; una brecha grande entre la performance que declaras y la real será parte de la conversación de evaluación.
+**5. Registrar el kernel de Jupyter**
 
-## Qué valoramos (en orden)
+```
+python -m ipykernel install --user --name andina-credito --display-name "Python (Andina Credito)"
+```
 
-1. Criterio para trabajar la data y decisiones metodológicas bien justificadas.
-2. Honestidad en la estimación de performance (validación bien diseñada).
-3. Traducción del modelo a una decisión de negocio con impacto cuantificado.
-4. Uso transparente e inteligente de IA.
-5. Performance del modelo — importa, pero menos que lo anterior.
+**6. Abrir el notebook de EDA**
 
-Buena suerte.
+```
+jupyter lab notebooks/01_eda.ipynb
+```
+
+Seleccionar el kernel **Python (Andina Credito)** y ejecutar todas las celdas (`Run → Run All Cells`).
+
+**7. Regenerar `predictions.csv`**
+
+```
+jupyter lab notebooks/02_modelo.ipynb
+```
+
+Ejecutar todas las celdas. El notebook escribe `predictions.csv` en la raíz del repositorio
+(12.000 filas, columnas `id_solicitud,prob_default`) y valida el formato con un `assert`.
+Toma unos 3 minutos, la mayor parte en la búsqueda de hiperparámetros.
+
+## Estructura del repositorio
+
+```
+.
+├── data/
+│   ├── train.csv               # 45.300 solicitudes 2024-01 → 2025-02 con target
+│   └── test.csv                # 12.000 solicitudes 2025-02 → 2025-06 sin target
+├── notebooks/
+│   ├── 01_eda.ipynb            # auditoría de datos: 12 hallazgos, cada uno con su gráfico
+│   └── 02_modelo.ipynb         # baseline WOE, LightGBM, explicabilidad, calibración y política
+├── src/
+│   └── prepare.py              # limpieza fit/transform, sin leakage
+├── predictions.csv             # entregable: 12.000 probabilidades
+├── INFORME.md                  # informe ejecutivo (etapa 4)
+├── AI_USAGE.md                 # documentación del uso de IA
+├── requirements.txt
+└── README.md
+```
+
+## Notas metodológicas
+
+**Validación.** No se usa k-fold aleatorio. Dada la deriva temporal documentada, la estimación de performance proviene de un backtesting temporal con ventanas expansivas (cuatro folds sucesivos), reportando el promedio y, por separado, el fold más reciente por ser el más representativo del período de test.
+
+**Calibración.** Como la política de aprobación compara probabilidades contra umbrales absolutos, la calibración es más crítica que el ranking. Se reportan Brier score y curva de calibración además del AUC.
+
+**Explicabilidad.** El modelo lleva restricciones de monotonía en 7 variables donde el negocio
+tiene una expectativa inequívoca, verificadas por dependencia parcial. Se acompaña de un
+baseline logístico con WOE, importancia por ganancia, análisis SHAP global e individual.
+
+**Gráficos.** El EDA usa Plotly. Los gráficos son interactivos y se renderizan dentro del notebook; `nbformat` es una dependencia obligatoria para ello.

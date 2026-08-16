@@ -1,10 +1,23 @@
-# Dependencias sugeridas (puedes modificarlas). Python 3.10+
+# Dependencias del proyecto — Data Scientist Senior · Andina Crédito
+# Python 3.10+
+#
+# Instalación:  pip install -r requirements.txt
+
+# --- Núcleo: manipulación de datos y modelado ---
 pandas>=2.0
 numpy>=1.24
 scikit-learn>=1.3
-# Opcionales según tu enfoque:
-# matplotlib
-# seaborn
-# xgboost
-# lightgbm
-# jupyter
+
+# --- Visualización interactiva (EDA) ---
+plotly>=5.0
+nbformat>=5.0        # REQUERIDO por Plotly para renderizar figuras en el notebook
+                     # (sin esto: "ValueError: Mime type rendering requires nbformat>=4.2.0")
+kaleido>=0.2         # (opcional) exportar figuras Plotly a imagen estática (PNG/PDF)
+
+# --- Entorno de notebooks ---
+jupyter>=1.0
+ipykernel>=6.0       # kernel de Python para ejecutar el notebook en VS Code
+nbconvert>=7.0       # (opcional) ejecutar/convertir el notebook desde la terminal
+
+# --- Modelado (Paso 2, próximo) ---
+lightgbm>=4.0        # modelo de gradient boosting para la probabilidad de default

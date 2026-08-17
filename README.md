@@ -8,7 +8,7 @@ Modelo de probabilidad de default (mora 90+ días a 12 meses) para solicitudes d
 |---|---|---|
 | 1. EDA y auditoría de datos | ✅ | `notebooks/01_eda.ipynb` |
 | 2. Modelado, calibración y política | ✅ | `notebooks/02_modelo.ipynb`, `predictions.csv` |
-| 4. Informe ejecutivo | ⏳ | `INFORME.md` |
+| 4. Informe ejecutivo | ✅ | `INFORME.md` |
 | Uso de IA | 🔄 en actualización continua | `AI_USAGE.md` |
 
 ## Hallazgos principales del EDA
@@ -28,8 +28,8 @@ Requiere Python 3.10 o superior. Ejecutar en orden desde la raíz del repositori
 **1. Clonar el repositorio**
 
 ```
-git clone https://github.com/<tu-usuario>/desafio-ds-senior.git
-cd desafio-ds-senior
+git clone https://github.com/emilioroa/DataScientistTestBice.git
+cd DataScientistTestBice
 ```
 
 **2. Crear el entorno virtual**
@@ -96,9 +96,11 @@ Toma unos 3 minutos, la mayor parte en la búsqueda de hiperparámetros.
 │   ├── 01_eda.ipynb            # auditoría de datos: 12 hallazgos, cada uno con su gráfico
 │   └── 02_modelo.ipynb         # baseline WOE, LightGBM, explicabilidad, calibración y política
 ├── src/
-│   └── prepare.py              # limpieza fit/transform, sin leakage
+│   ├── prepare.py              # limpieza fit/transform, sin leakage
+│   └── figuras_informe.py      # regenera las imágenes de INFORME.md
+├── reports/figuras/            # imágenes estáticas del informe
 ├── predictions.csv             # entregable: 12.000 probabilidades
-├── INFORME.md                  # informe ejecutivo (etapa 4)
+├── INFORME.md                  # informe ejecutivo (2 páginas, no técnico)
 ├── AI_USAGE.md                 # documentación del uso de IA
 ├── requirements.txt
 └── README.md
